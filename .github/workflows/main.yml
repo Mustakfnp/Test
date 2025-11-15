@@ -1,4 +1,4 @@
-name: Test
+name: 1RDP
 
 on:
   workflow_dispatch:
@@ -25,9 +25,9 @@ jobs:
 
       - name: Create RDP User with Fixed Password
         run: |
-          $password = "YourFixedPassword123!"     # ← এখানে তোমার পাসওয়ার্ড দাও
+          $password = "Rdp@2025"    # <<=== এখানে তোমার নিজের পাসওয়ার্ড দাও
           $securePass = ConvertTo-SecureString $password -AsPlainText -Force
-          
+
           New-LocalUser -Name "RDP" -Password $securePass -AccountNeverExpires
           Add-LocalGroupMember -Group "Administrators" -Member "RDP"
           Add-LocalGroupMember -Group "Remote Desktop Users" -Member "RDP"
@@ -38,7 +38,7 @@ jobs:
         run: |
           $tsUrl = "https://pkgs.tailscale.com/stable/tailscale-setup-1.82.0-amd64.msi"
           $installerPath = "$env:TEMP\tailscale.msi"
-          
+
           Invoke-WebRequest -Uri $tsUrl -OutFile $installerPath
           Start-Process msiexec.exe -ArgumentList "/i", "`"$installerPath`"", "/quiet", "/norestart" -Wait
           Remove-Item $installerPath -Force
@@ -46,7 +46,7 @@ jobs:
       - name: Establish Tailscale Connection
         run: |
           & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=gh-runner-$env:GITHUB_RUN_ID
-          
+
           $tsIP = $null
           $retries = 0
           while (-not $tsIP -and $retries -lt 10) {
@@ -54,12 +54,18 @@ jobs:
               Start-Sleep -Seconds 5
               $retries++
           }
-          
+
           if (-not $tsIP) {
               Write-Error "Tailscale IP not assigned. Exiting."
               exit 1
           }
           echo "TAILSCALE_IP=$tsIP" >> $env:GITHUB_ENV
+
+      - name: Install Microsoft Office
+        run: |
+          Write-Host "Installing Microsoft Office..."
+          winget install --id Microsoft.Office --accept-package-agreements --accept-source-agreements
+          Write-Host "Microsoft Office Successfully Installed!"
 
       - name: Verify RDP Accessibility
         run: |
