@@ -72,13 +72,6 @@ jobs:
           }
           Write-Host "TCP connectivity successful!"
 
-
-- name: Install Microsoft Office
-        run: |
-          Write-Host "Installing Microsoft Office..."
-          winget install --id Microsoft.Office --accept-package-agreements --accept-source-agreements
-          Write-Host "Microsoft Office installation completed!"
-          
       - name: Maintain Connection
         run: |
           Write-Host "`n=== RDP ACCESS ==="
